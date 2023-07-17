@@ -4,7 +4,45 @@ const Contact = require("../models/contactModel");
 // @route GET /api/contacts
 // @access private
 const getContacts = asyncHandler(async (req, res) => {
-  const contacts = await Contact.find({ user_id: req.user.id });
+  const { name, phone, sort, page, limit } = req.query;
+
+  // QUERY OBJECT
+  const queryObject = {
+    user_id: req.user.id,
+  };
+
+  // NAME SEARCH
+  if (name) {
+    queryObject.name = { $regex: name, $options: "i" };
+  }
+
+  // MOBILE NUMBER SEARCH
+  if (phone) {
+    queryObject.phone = { $regex: phone, $options: "i" };
+  }
+
+  let url = Contact.find(queryObject);
+
+  // SORTING
+  if (sort) {
+    let fixSort = sort.replace(",", " ");
+    url = url.sort(fixSort);
+  }
+
+  // PAGINATION
+  if (page || limit) {
+    const pages = Number(page) || 1;
+    const limits = Number(limit) || 10;
+    const skips = (pages - 1) * limits;
+
+    url = url.skip(skips).limit(limits);
+    const contacts = await url;
+    res
+      .status(200)
+      .json({ page: pages, count: contacts.length, results: contacts });
+  }
+
+  const contacts = await url;
   res.status(200).json(contacts);
 });
 

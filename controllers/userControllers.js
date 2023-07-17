@@ -2,11 +2,12 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 // @desc Register a user
 // @route POST /api/user/register
 // @access public
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, gender } = req.body;
 
   if (!username || !email || !password) {
     res.status(400);
@@ -26,10 +27,15 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     password: hashedPassword,
+    gender,
   });
 
   if (register) {
-    res.status(201).json({ _id: register.id, email: register.email });
+    res.status(201).json({
+      _id: register.id,
+      email: register.email,
+      gender: register.gender,
+    });
   } else {
     res.status(400);
     throw new Error("user data us not valid");
@@ -60,20 +66,64 @@ const loginUser = asyncHandler(async (req, res) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRETE,
-      { expiresIn: "15m" }
+      { expiresIn: "1y" }
     );
-    res.status(200).json({ accessToken });
+    res.status(200).json({ accessToken, user });
   } else {
     res.status(401);
     throw new Error("email or password not valid");
   }
 });
 
+// localhost:5000/api/user/update/profile/64a6c2617368d8cbc8eb92aa
+
 // @desc current user information
 // @route GET /api/user/current
 // @access private
 const currentUser = asyncHandler(async (req, res) => {
-  res.status(200).json(req.user);
+  const userInfo = await User.find({ email: req.user.email });
+  console.log(userInfo);
+  const userInformation = {
+    id: userInfo[0]._id,
+    username: userInfo[0].username,
+    email: userInfo[0].email,
+    gender: userInfo[0].gender,
+  };
+  res.status(200).json(userInformation);
 });
 
-module.exports = { registerUser, loginUser, currentUser };
+// @desc current user information
+// @route GET /api/user/upload/profile
+// @access private
+const updateProfile = asyncHandler(async (req, res) => {
+  const updateProfileId = await User.findById(req.params.id);
+
+  if (!updateProfileId) {
+    res.status(404);
+    throw new Error("No Contact Found");
+  }
+  const { password } = req.body;
+
+  if (password) {
+    res.status(401);
+    throw new Error("password field are not changeable");
+  }
+
+  // const profilePicture = req.file.buffer.toString("base64");
+
+  const profilePicture = `localhost:5000/profile-pictures/${req.file.originalname}`;
+
+  const profileUpdate = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      ...req.body,
+      profile_picture: profilePicture,
+    },
+    {
+      new: true,
+    }
+  );
+  res.status(200).json(profileUpdate);
+});
+
+module.exports = { registerUser, loginUser, currentUser, updateProfile };
