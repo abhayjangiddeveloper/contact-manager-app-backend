@@ -10,7 +10,6 @@ const {
 } = require("../controllers/contactControllers");
 const validateToken = require("../middleware/validateTokenHandler");
 
-// File upload configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/upload");
@@ -21,19 +20,8 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter to allow only image files (you can customize the filter based on your requirements)
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image files are allowed!"), false);
-  }
-};
-
-// Multer upload middleware with storage and fileFilter
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
 });
 
 router.use(validateToken);
