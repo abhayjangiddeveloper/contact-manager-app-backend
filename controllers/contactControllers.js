@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Contact = require("../models/contactModel");
+const dotenv = require("dotenv").config();
 
 // @desc Get all contacts
 // @route GET /api/contacts
