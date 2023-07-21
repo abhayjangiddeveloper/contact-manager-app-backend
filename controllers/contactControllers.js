@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Contact = require("../models/contactModel");
+
 // @desc Get all contacts
 // @route GET /api/contacts
 // @access private
@@ -55,11 +56,15 @@ const createContacts = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("All fields are required!");
   }
+
+  const profileLink = `${process.env.URL}/upload/${req.file.filename}`;
+
   const create = await Contact.create({
     name,
     email,
     phone,
     user_id: req.user.id,
+    contact_profile: profileLink,
   });
 
   res.status(201).json(create);
@@ -94,9 +99,14 @@ const updateContact = asyncHandler(async (req, res) => {
     throw new Error("User don't permission to update other user contacts");
   }
 
+  const profileLink = `${process.env.URL}/upload/${req.file.filename}`;
+
   const contactUpdate = await Contact.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    {
+      ...req.body,
+      contact_profile: profileLink,
+    },
     { new: true }
   );
   res.status(200).json(contactUpdate);

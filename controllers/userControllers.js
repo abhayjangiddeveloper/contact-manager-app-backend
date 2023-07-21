@@ -82,7 +82,6 @@ const loginUser = asyncHandler(async (req, res) => {
 // @access private
 const currentUser = asyncHandler(async (req, res) => {
   const userInfo = await User.find({ email: req.user.email });
-  console.log(userInfo);
   const userInformation = {
     id: userInfo[0]._id,
     username: userInfo[0].username,
@@ -93,7 +92,7 @@ const currentUser = asyncHandler(async (req, res) => {
 });
 
 // @desc current user information
-// @route GET /api/user/upload/profile
+// @route GET /api/user/update/profile/:id
 // @access private
 const updateProfile = asyncHandler(async (req, res) => {
   const updateProfileId = await User.findById(req.params.id);
