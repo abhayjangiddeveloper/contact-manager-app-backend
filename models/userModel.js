@@ -15,16 +15,6 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "Please enter a password"],
     },
-    gender: {
-      type: String,
-      required: [true, "please enter your gender"],
-    },
-    class: {
-      type: String,
-    },
-    profile_picture: {
-      type: String,
-    },
   },
   {
     timestamps: true,

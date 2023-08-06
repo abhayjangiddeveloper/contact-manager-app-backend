@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 // @route POST /api/user/register
 // @access public
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password, gender } = req.body;
+  const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
     res.status(400);
@@ -27,14 +27,14 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     password: hashedPassword,
-    gender,
+    // gender: null,
+    // profile_picture: null,
   });
 
   if (register) {
     res.status(201).json({
       _id: register.id,
       email: register.email,
-      gender: register.gender,
     });
   } else {
     res.status(400);

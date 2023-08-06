@@ -67,7 +67,6 @@ const createContacts = asyncHandler(async (req, res) => {
     user_id: req.user.id,
     contact_profile: profileLink,
   });
-
   res.status(201).json(create);
 });
 
@@ -106,7 +105,7 @@ const updateContact = asyncHandler(async (req, res) => {
     req.params.id,
     {
       ...req.body,
-      contact_profile: profileLink,
+      // contact_profile: profileLink ? profileLink : null,
     },
     { new: true }
   );
