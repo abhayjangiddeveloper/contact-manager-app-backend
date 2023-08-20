@@ -87,29 +87,44 @@ const getSingleContacts = asyncHandler(async (req, res) => {
 // @route PUT /api/contacts/:id
 // @access private
 const updateContact = asyncHandler(async (req, res) => {
-  const SingleContacts = await Contact.findById(req.params.id);
+  const singleContact = await Contact.findById(req.params.id);
 
-  if (!SingleContacts) {
+  if (!singleContact) {
     res.status(404);
     throw new Error("No Contact Found");
   }
 
-  if (SingleContacts.user_id.toString() !== req.user.id) {
+  if (singleContact.user_id.toString() !== req.user.id) {
     res.status(403);
-    throw new Error("User don't permission to update other user contacts");
+    throw new Error(
+      "User doesn't have permission to update other user contacts"
+    );
   }
 
-  const profileLink = `${process.env.URL}/upload/${req.file.filename}`;
+  // If a new profile photo is uploaded, update it along with other fields
+  if (req.file) {
+    const profileLink = `${process.env.URL}/upload/${req.file.filename}`;
+    const updatedContact = await Contact.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        contact_profile: profileLink,
+      },
+      { new: true }
+    );
 
-  const contactUpdate = await Contact.findByIdAndUpdate(
-    req.params.id,
-    {
-      ...req.body,
-      // contact_profile: profileLink ? profileLink : null,
-    },
-    { new: true }
-  );
-  res.status(200).json(contactUpdate);
+    res.status(200).json(updatedContact);
+  } else {
+    // If no new profile photo, update only other fields
+    const updatedContact = await Contact.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedContact);
+  }
 });
 
 // @desc Delete a contacts
